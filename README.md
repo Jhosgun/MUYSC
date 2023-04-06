@@ -1,4 +1,4 @@
-#MUYSC (Muography Simulation Code)
+# MUYSC (Muography Simulation Code)
 MUYSC (Muography Simulation Code) es un software de simulación diseñado para modelar y analizar datos de muografía en aplicaciones geofísicas y geológicas. Este repositorio contiene el código fuente, ejemplos y documentación necesaria para utilizar y contribuir a este proyecto.
 
 Descripción
