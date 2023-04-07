@@ -11,12 +11,13 @@ MUYSC implements a muography simulation framework capable of rapidly estimating 
 
 ### Modules
 
-![texto_alternativo](Modulos.jpg)
+<img src="modulos.jpg" alt="Ejemplo de imagen" width="200" height="100">
 
-* Simulación de trayectorias de partículas en ambientes geológicos.
-* Modelado de la atenuación de la señal en diferentes condiciones geológicas.
-* Análisis de datos de muografía para aplicaciones geofísicas y geológicas.
-* Herramientas de visualización para facilitar la interpretación de resultados.
+
+* Download topography data of the geological structure.
+* Distances traveled in muon section
+* Calculation of the integrated muon flux
+* Parameters of the telecopes
 
 
 ## Requirements
