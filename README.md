@@ -11,7 +11,7 @@ MUYSC implements a muography simulation framework capable of rapidly estimating 
 
 ### Modules
 
-<img src="modulos.jpg" alt="Ejemplo de imagen" width="200" height="100">
+<img src="Modulos.jpg" alt="Ejemplo de imagen" width="200" height="100">
 
 
 * Download topography data of the geological structure.
