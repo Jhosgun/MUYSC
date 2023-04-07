@@ -21,10 +21,10 @@ MUYSC is a muography simulation framework capable of rapidly estimating rough mu
 
 
 ## Requirements
-* Python 3.x
+* Python 3.7 >
 * NumPy
 * Matplotlib
-* SRTM.py
+* SRTM
 
 
 ## Installation
@@ -58,6 +58,9 @@ Submit a pull request detailing your changes and why they are needed.
 
 ## License
 MUYSC is licensed under the creative commons.
+
+## Publicaciton :mortar_board:
+You can read more about our project clicking [here](https://www.researchgate.net/publication/369035316_MUYSC_An_end-to-end_muography_simulation_toolbox)
 
 ## Contact
 If you have any questions or suggestions about MUYSC, please contact us by e-mail at jorge2170083@correo.uis.edu.co.
