@@ -9,7 +9,7 @@
 MUYSC is a muography simulation framework capable of rapidly estimating rough muograms of any geological structure worldwide. MUYSC generates the muon flux at the observation place, transports the muons along the geological target, and determines the integrated muon flux detected by the telescope. Additionally, MUYSC computes the muon detector parameters (acceptance, solid angle, and angular resolution) and reconstructs the 3-dimensional density distribution of the target. MUYSC was born from the mute project to provide a first approximation for a real muography study.
 
 
-## Modules
+## Modules 🔨
 
 <img src="Modulos.jpg" alt="Ejemplo de imagen" width="400">
 
@@ -28,20 +28,11 @@ MUYSC is a muography simulation framework capable of rapidly estimating rough mu
 
 
 ## Installation
-Clone this repository:
 
-bash
-Copy code
-git clone https://github.com/username/MUYSC.git
-Install the dependencies:
+```
+$ pip install MUYSC
+```
 
-Copy code
-pip install -r requirements.txt
-Run a simulation example:
-
-Copy code
-python example.py
-Using
 See the documentation and examples included in this repository for information on how to use MUYSC in your own muography applications.
 
 ## Documentation :books:
@@ -62,7 +53,7 @@ MUYSC is licensed under the creative commons.
 ## Publicaciton :mortar_board:
 You can read more about our project clicking [here](https://www.researchgate.net/publication/369035316_MUYSC_An_end-to-end_muography_simulation_toolbox)
 
-## Team
+## Team ✒️
 * Jesus Peña [JesusPenha](https://github.com/JesusPenha)
 * Jorge Jaimes [Jhosgun](https://github.com/Jhosgun)
 * Kevin Dlaikan 
