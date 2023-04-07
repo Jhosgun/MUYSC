@@ -44,8 +44,8 @@ python example.py
 Using
 See the documentation and examples included in this repository for information on how to use MUYSC in your own muography applications.
 
-
-The documentation will be available in /documentation and in the wiki of this repository.
+## Documentation :books:
+The documentation will be available in [Mute page](https://halley.uis.edu.co/fuego/muysc/) and in the [wiki](https://github.com/Jhosgun/MUYSC/wiki) of this repository.
 
 
 ## Contribution
@@ -62,5 +62,9 @@ MUYSC is licensed under the creative commons.
 ## Publicaciton :mortar_board:
 You can read more about our project clicking [here](https://www.researchgate.net/publication/369035316_MUYSC_An_end-to-end_muography_simulation_toolbox)
 
+## Team
+* Jesus Peña [JesusPenha](https://github.com/JesusPenha)
+* Jorge Jaimes [Jhosgun](https://github.com/Jhosgun)
+* Kevin Dlaikan 
 ## Contact
 If you have any questions or suggestions about MUYSC, please contact us by e-mail at jorge2170083@correo.uis.edu.co.
