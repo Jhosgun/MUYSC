@@ -36,23 +36,6 @@ $ pip install MUYSC
 ```
 See the documentation and examples included in this repository for information on how to use MUYSC in your own muography applications.
 
-## Usage ⚙️
-
-<details>
-  <summary>Sección 1</summary>
-  
-</details>
-
-<details>
-  <summary>Sección 2</summary>
-  Contenido de la sección 2.
-</details>
-
-<details>
-  <summary>Sección 3</summary>
-  Contenido de la sección 3.
-</details>
-
 
 ## Documentation :books:
 The documentation will be available in [Mute page](https://halley.uis.edu.co/fuego/muysc/) and in the [wiki](https://github.com/Jhosgun/MUYSC/wiki) of this repository.
