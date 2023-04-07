@@ -21,10 +21,10 @@ MUYSC implements a muography simulation framework capable of rapidly estimating 
 
 
 ## Requirements
-Python 3.x
-NumPy
-Matplotlib
-SRTM.py
+* Python 3.x
+* NumPy
+* Matplotlib
+* SRTM.py
 
 
 ## Installation
