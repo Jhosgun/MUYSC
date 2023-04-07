@@ -1,6 +1,6 @@
 # MUYSC (Muography Simulation Code)
 
-![texto_alternativo](/images/MUYSC.png)
+![texto_alternativo](images/MUYSC.png)
 
 
 MUYSC implements a muography simulation framework capable of rapidly estimating rough muograms of any geological structure worldwide. MUYSC generates the muon flux at the observation place, transports the muons along the geological target, and determines the integrated muon flux detected by the telescope. Additionally, MUYSC computes the muon detector parameters (acceptance, solid angle, and angular resolution) and reconstructs the 3-dimensional density distribution of the target. 
