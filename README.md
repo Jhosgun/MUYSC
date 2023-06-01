@@ -17,11 +17,8 @@ MUYSC is a muography simulation framework capable of rapidly estimating rough mu
 * Download topography data of the geological structure.
 * Distances traveled in muon section
 * Calculation of the integrated muon flux
-* Parameters of the telecopes
-
-
 <details>
-  <summary><b>Telescope Parameters Calculator</b></summary>
+  <summary><h2>Parameter of the telescope</h2></summary>
 
   
 This script, `telescopeParams.py`, provides a Python class to calculate several telescope parameters given the number of bars, pixel size, panel separation, and the distance from the volcano. 
@@ -64,9 +61,9 @@ nBars_value = 40  # Assume some value for the number of bars
 d_value = 1  # Assume some value for pixel size in cm
 D_value = 150  # Assume some value for panel separation
 L_value = 50  # Assume some value for distance from the volcano in meters
-
+cmap = "jet" # Color map
 # Create an object of the telescopeParams class
-my_telescope = telescopeParams(nBars_value, d_value, D_value, L_value)
+my_telescope = telescopeParams(nBars_value, d_value, D_value, L_value, cmap)
 
 # Calculate and plot different parameters of the telescope
 my_telescope.solid_angle()
@@ -81,85 +78,6 @@ Note: The plotting functions in this script rely on Matplotlib, so ensure you ha
 
 
 </details>
-
-
-# Telescope Parameters Calculator
-
-This script, `telescopeParams.py`, provides a Python class to calculate several telescope parameters given the number of bars, pixel size, panel separation, and the distance from the volcano. 
-
-## Class: telescopeParams
-
-This class takes in the following parameters: 
-
-- `nBars`: Number of bars in the telescope
-- `d`: Pixel size in cm
-- `D`: Panel separation 
-- `L`: Distance from the volcano in meters
-
-The `telescopeParams` class contains several methods which are used to calculate various parameters of the telescope and display plots of these parameters.
-
-## Class Methods
-
-The methods in the class are as follows:
-
-- `__init__`: This is the constructor for the `telescopeParams` class.
-
-- `create_plot`: This method creates a plot of given data with labels, axes, and colorbars.
-
-- `solid_angle`: This method calculates the solid angle of the telescope given its parameters.
-
-- `N_pixel`: This method calculates the number of pixels given the telescope's parameters.
-
-- `acceptance`: This method calculates the acceptance of the telescope.
-
-- `S_pixels`: This method calculates the S_pixel parameter.
-
-- `create_subplot`: This method creates a subplot given data, a colorbar label, and an axis.
-
-- `plot_all_params`: This method creates a 2x2 grid of subplots containing the solid angle, number of pixels, acceptance, and S_pixel.
-
-## Example Usage:
-
-```python
-nBars_value = 40  # Assume some value for the number of bars
-d_value = 1  # Assume some value for pixel size in cm
-D_value = 150  # Assume some value for panel separation
-L_value = 50  # Assume some value for distance from the volcano in meters
-
-# Create an object of the telescopeParams class
-my_telescope = telescopeParams(nBars_value, d_value, D_value, L_value)
-
-# Calculate and plot different parameters of the telescope
-my_telescope.solid_angle()
-my_telescope.N_pixel()
-my_telescope.acceptance()
-my_telescope.S_pixels()
-my_telescope.plot_all_params()
-```
-In this example, an instance of `telescopeParams` is created with given parameter values. The different methods are then called on this instance to calculate the telescope parameters and plot them.
-
-Note: The plotting functions in this script rely on Matplotlib, so ensure you have that library installed before running.
-
-## Dependencies:
-
-This script relies on the following Python libraries:
-
-- `numpy`
-- `matplotlib`
-
-Make sure to install these libraries using pip:
-
-```bash
-pip install numpy matplotlib
-```
-
-## Contributors
-
-We appreciate any contributions to improve this project. Please feel free to fork and submit a pull request.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/username/reponame/blob/main/LICENSE) file for details.
 
 
 ## Requirements
