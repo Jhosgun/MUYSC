@@ -1,0 +1,234 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
+from mpl_toolkits.mplot3d import Axes3D
+import scipy
+from scipy import stats
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+import scipy.ndimage as ndimage
+import re
+
+
+
+class telescopeParams:
+    
+    def __init__(self, nBars, d, D, L, color):
+        """
+        The constructor function of the telescopeParams class.
+        
+        Parameters:
+        nBars (int): The number of bars in the panel.
+        d (float): The pixel size in cm.
+        D (float): The panel separation.
+        L (float): The distance from the volcano in m.
+        Color (map color): The Colormap
+        """
+        self.nBars = nBars
+        self.d = d      
+        self.D = D      
+        self.L = L     
+        self.color = color
+
+    def create_plot(self, data, colorbar_label):
+        """
+        Creates a plot with given data and colorbar label.
+        
+        Parameters:
+        data (ndarray): 2D array data to be plotted.
+        colorbar_label (str): Label for the colorbar in the plot.
+        """
+        
+        nBars = self.nBars 
+        theta = self.theta 
+        Nd = self.Nd  
+
+        
+        fig = plt.figure(figsize=(35, 8))
+        ax = fig.add_subplot(131)
+        ax.set_xlabel("$\Theta_x$ [deg]", fontsize = 25)
+        ax.set_ylabel("$\Theta_y$ [deg]", fontsize = 25)
+    
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+   
+        extent=(-nBars*theta,nBars*theta,-nBars*theta,nBars*theta)
+        im = plt.imshow(data, interpolation='nearest', extent=extent, origin='lower', cmap=self.color)
+    
+        # Color bar
+     
+        clb = plt.colorbar()
+        clb.set_label(colorbar_label, fontsize = 25)
+        clb.ax.tick_params(labelsize = 20)
+    
+        # Set tick labels
+        labelsx = np.round(np.linspace(-nBars*theta, nBars*theta, 11),1)
+        labelsy = np.round(np.linspace(-nBars*theta, nBars*theta, 11),1)
+        ax.set_xticklabels(labelsx.astype(int))
+        ax.set_yticklabels(labelsy.astype(int))
+    
+        # Center location
+        plt.axvline(x=0, color='k', lw=1, linestyle='--')
+        plt.axhline(y=0, color='k', lw=1, linestyle='--')
+    
+        # Increase tick labels
+        ax.tick_params(axis='both', which='major', labelsize=15)
+
+    
+    def solid_angle(self):
+        """
+        Calculates the solid angle of the telescope.
+        """
+        self.A = self.d**2    #  Pixel area
+        d_Omega =  self.A/(self.D**2)
+        
+        self.theta = int(np.rad2deg(np.arctan(self.d*self.nBars/self.D)))/float(self.nBars)
+        
+        self.Nd = (2*self.nBars-1)    # Number of trajectories
+        C = self.nBars-1         # Shiffting index
+        
+        r = np.zeros((self.Nd,self.Nd))
+        
+        matrix_P1 = np.zeros((self.nBars, self.nBars))
+        matrix_P2 = np.ones((self.nBars, self.nBars))
+        
+        for i in range(self.nBars):
+            for j in range(self.nBars):
+                for k in range(self.nBars):
+                    for l in range(self.nBars):
+        
+                        h = k-i
+                        b = l-j
+                        ik = np.abs(k-i)
+                        jl = np.abs(l-j)
+        
+                        E = np.sqrt((ik*self.d)**2 + (jl*self.d)**2)
+                        r[h+C,b+C]= np.sqrt(self.D**2 + E**2)
+        
+        self.solid_Ang = self.A/((r/2)**2)
+        
+        delta_theta = 2*np.tan(self.d/self.D)
+        
+        print ("Angular aperture = " + str(2*self.nBars*self.theta) + " deg")
+        print ("Angular aperture = " + str(np.round(2*np.arctan(self.nBars*self.d/self.D),2)) + " rad")
+        print ("Angular resolution = " + str(np.round(1000*delta_theta,2)) + " mrad")
+        
+        delta_x = self.L*np.tan(delta_theta)
+        print ("Spatial resolution on the volcano = %s m" % str(np.round(delta_x,2)))
+
+        # Graficar 
+        self.create_plot(self.solid_Ang*1000, 'Solid angle [x10$^{-3}$sr]')
+
+    def N_pixel(self):
+        """
+        Calculates the number of pixels.
+        """
+        
+        Nd = (2*self.nBars-1)    # Number of trajectories
+        C = self.nBars-1        # Shiffting index
+        
+        self.n_Pixel = np.zeros((Nd,Nd))
+        
+        matrix_P1 = np.zeros((self.nBars, self.nBars))
+        matrix_P2 = np.ones((self.nBars, self.nBars))
+        
+        for i in range(self.nBars):
+            for j in range(self.nBars):
+                matrix_P1[i,j] = 1
+                for k in range(self.nBars):
+                    for l in range(self.nBars):
+        
+                        if matrix_P1[i,j]== 1:
+                            iP1 = i
+                            jP1 = j
+                        if matrix_P2[k,l]== 1:
+                            iP2 = k
+                            jP2 = l
+        
+                        h = iP1 - iP2
+                        b = jP1 - jP2
+        
+                        self.n_Pixel[h+C,b+C]= self.n_Pixel[h+C,b+C] + 1
+                        
+        print ("Maximum number of pixel = " + str(np.max(self.n_Pixel)))
+
+        self.create_plot(self.n_Pixel, 'Number of pixels')
+
+    def acceptance(self):
+        """
+        Calculates the acceptance of the telescope.
+        """
+        
+        self.acceptance = self.n_Pixel * self.solid_Ang * self.A / 4
+        
+        self.create_plot(self.acceptance,'Acceptance [cm$^2$sr]')
+    
+    def S_pixels(self):
+        """
+        Calculates and plots the area of pixels.
+        """
+        
+        self.create_plot(self.n_Pixel*self.A/1000, '$S$ [x10$^{3}$cm$^2$]')
+        
+
+    def create_subplot(self, data, colorbar_label, ax):
+        """
+        Creates a subplot with given data, colorbar label and axis.
+        
+        Parameters:
+        data (ndarray): 2D array data to be plotted in the subplot.
+        colorbar_label (str): Label for the colorbar in the subplot.
+        ax (matplotlib.axes.Axes): Axis object to draw the plot onto.
+        """
+        nBars = self.nBars
+        theta = self.theta
+        Nd = self.Nd
+        
+        ax.set_xlabel("$\Theta_x$ [deg]", fontsize = 15)
+        ax.set_ylabel("$\Theta_y$ [deg]", fontsize = 15)
+    
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    
+        extent=(-nBars*theta,nBars*theta,-nBars*theta,nBars*theta)
+        im = ax.imshow(data, interpolation='nearest', extent=extent, origin='lower', cmap=self.color)
+    
+        # Color bar
+        clb = plt.colorbar(im, ax=ax)
+        clb.set_label(colorbar_label, fontsize = 15)
+        clb.ax.tick_params(labelsize = 10)
+    
+        # Set tick labels
+        labelsx = np.round(np.linspace(-nBars*theta, nBars*theta, 11),1)
+        labelsy = np.round(np.linspace(-nBars*theta, nBars*theta, 11),1)
+        ax.set_xticklabels(labelsx.astype(int))
+        ax.set_yticklabels(labelsy.astype(int))
+    
+        # Center location
+        ax.axvline(x=0, color='k', lw=1, linestyle='--')
+        ax.axhline(y=0, color='k', lw=1, linestyle='--')
+    
+        # Increase tick labels
+        ax.tick_params(axis='both', which='major', labelsize=10)
+    
+        
+
+    def plot_all_params(self):
+        """
+        Plots all parameters by creating a grid of subplots.
+        """
+        
+        # Create the figure with a 2x2 grid of subplots
+        fig, axs = plt.subplots(2, 2, figsize=(16,16))
+
+        # Plot each set of data in a different subplot
+
+        self.create_subplot(self.solid_Ang*1000, 'Solid angle [x10$^{-3}$sr]',axs[0, 0])        
+        self.create_subplot(self.n_Pixel, 'Number of pixels',axs[0, 1])
+        self.create_subplot(self.acceptance,'Acceptance [cm$^2$sr]',axs[1, 0])
+        self.create_subplot(self.n_Pixel*self.A/1000, '$S$ [x10$^{3}$cm$^2$]',axs[1, 1])
+        
+        plt.tight_layout()
+        plt.show()
+
