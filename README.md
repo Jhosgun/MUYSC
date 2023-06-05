@@ -17,6 +17,7 @@ MUYSC is a muography simulation framework capable of rapidly estimating rough mu
 * Download topography data of the geological structure.
 * Distances traveled in muon section
 * Calculation of the integrated muon flux
+* Parameters of the telescope
 <details>
   <summary><h2>Parameter of the telescope</h2></summary>
 
