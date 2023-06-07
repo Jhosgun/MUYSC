@@ -28,14 +28,17 @@ import os
 import requests
 import numpy as np
 import math
+import TopographyDownloader
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_pdf import PdfPages
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy import signal
 import matplotlib as mpl
-import Fluxes
+import FluxModels
+
 
 from srtm import Srtm1HeightMapCollection
 
@@ -67,7 +70,10 @@ class Mute(object):
         self.points = points 
         self.regionPoints = region
 
-
+    def inicialize_Topography(self,path):
+        downloader = TopographyDownloader.TopographyData(self.regionPoints[:4])
+        downloader.download_to_path(path)
+        
     def measure(self, lat1, lon1, lat2, lon2):  
         """Converting GMS coordinates to local meters.
         """
@@ -167,7 +173,7 @@ class Mute(object):
         azimutP = azimut[2]
         
         # Equation creation
-        t = 2
+        t = 4
         self.PjecX = self.obsPX+(self.RefPX-self.obsPX)*t
         self.PjecY = self.obsPY+(self.RefPY-self.obsPY)*t
         self.PjecZ = self.obsPZ+(self.RefPZ-self.obsPZ)*t
@@ -242,8 +248,16 @@ class Mute(object):
         matrixDatos[:,2] = self.distances.flatten()
         
         self.matrixDatos = matrixDatos
+    
+    def Flux(self):
+        Flux = FluxModels.FluxIntegrated(self.matrixDatos)
+        Flux.showData()
+        Flux.OpenSky()
+        Flux.Elevation(self.obsPX,self.RefPX,self.obsPY,self.RefPY,self.obsPZ,self.RefPZ)
+        Flux.ShowIntegratedFlux()
+        Flux.ShowOpacity()
+        Flux.ShowDensity()
         
-
     def calculate_distance(self,equationX,equationY,equationZ):
         """ This function calculate the distance for each point
         """
@@ -371,35 +385,95 @@ class Mute(object):
     def show_distances(self):
         """ This function plot the distance traversed in geological structured
         """
-        fig = plt.figure(figsize=(20,17))
+        fig, ax = plt.subplots(figsize=(20,17))
         extent = (min(self.azimut), max(self.azimut), min(self.cenit),max(self.cenit))
-        plt.imshow(self.distances, interpolation='nearest', extent=extent, origin='upper', cmap=self.cmap)
-        plt.xlabel("Azimuth [degree]", fontsize = 25)
-        plt.ylabel("Zenith [degree]", fontsize = 25)
-        plt.title("Distancia recorrida "+self.name, fontsize = 25)
+        im = ax.imshow(self.distances, interpolation='nearest', extent=extent, origin='upper', cmap=self.cmap)
+        #im = ax.imshow(self.distances, interpolation='nearest', origin='upper', cmap=self.cmap)
+        ax.set_xlabel("Azimuth [degree]", fontsize = 25)
+        ax.set_ylabel("Zenith [degree]", fontsize = 25)
+        ax.set_title("Distancia recorrida "+self.name, fontsize = 25)
+
+        # Create an axes on the right side of ax. The width of cax will be 5%
+        # of ax and the padding between cax and ax will be fixed at 0.05 inch.
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
 
         # Color bar
-        clb = plt.colorbar()
+        clb = plt.colorbar(im, cax=cax)
         clb.set_label('d [m]', fontsize = 25)
         clb.ax.tick_params(labelsize = 20)
         
         
-        plt.contour(self.distances, [30,self.distances.max()/2], colors='k', origin='upper', extent=extent)
+        # Define contour levels
+        contour_levels = np.linspace(self.distances.min(), self.distances.max(), 4)  # 4 contour lines
+
+        # Draw contour lines
+        contour_lines = ax.contour(self.distances, contour_levels, colors='k', origin='upper', extent=extent)
+
+        # Add labels to contour lines
+        ax.clabel(contour_lines, inline=True, fontsize=10, colors='white')
+        
 
         labelsx = np.round(np.linspace(min(self.azimut), max(self.azimut), 11),0)
         labelsy = np.round(np.linspace(min(self.cenit), max(self.cenit), 11),0)
 
-        plt.xticks(labelsx, fontsize = 25)
-        plt.yticks(labelsy, fontsize = 25)
-        
-        output_pdf = self.name + "RayTracing.pdf"
+        ax.set_xticks(labelsx, fontsize = 35)
+        ax.set_yticks(labelsy, fontsize = 35)
+
+        output_pdf = self.name + "RayTracing.png"
         with PdfPages(output_pdf) as pdf:
             pdf.savefig(fig)  
-            
+
         plt.show()
+
+    def show_distances_no_extent(self):
         
-        
-        
+        """ This function plot the distance traversed in geological structured
+        """
+        fig, ax = plt.subplots(figsize=(20,17))
+
+        im = ax.imshow(self.distances, interpolation='nearest', origin='upper', cmap=self.cmap)
+
+        ax.set_xlabel("Azimuth [degree]", fontsize = 25)
+        ax.set_ylabel("Zenith [degree]", fontsize = 25)
+        ax.set_title("Distancia recorrida "+self.name, fontsize = 25)
+
+        # Create an axes on the right side of ax. The width of cax will be 5%
+        # of ax and the padding between cax and ax will be fixed at 0.05 inch.
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+
+        # Color bar
+        clb = plt.colorbar(im, cax=cax)
+        clb.set_label('d [m]', fontsize = 25)
+        clb.ax.tick_params(labelsize = 20)
+
+        # Define contour levels
+        contour_levels = np.linspace(self.distances.min(), self.distances.max(), 4)  # 4 contour lines
+
+        # Draw contour lines (without specifying origin)
+        contour_lines = ax.contour(self.distances, contour_levels, colors='k')
+
+        # Add labels to contour lines
+        ax.clabel(contour_lines, inline=True, fontsize=10, colors='white')
+
+        # Adjust these to match your data's array indices
+        labelsx_indices = np.linspace(0, self.distances.shape[1]-1, 11).astype(int)
+        labelsy_indices = np.linspace(0, self.distances.shape[0]-1, 11).astype(int)
+
+        ax.set_xticks(labelsx_indices)
+        ax.set_yticks(labelsy_indices)
+
+        # Put the actual azimuth and zenith values as labels
+        ax.set_xticklabels(np.round(np.linspace(min(self.azimut), max(self.azimut), 11), 0), fontsize=35)
+        ax.set_yticklabels(np.round(np.linspace(min(self.cenit), max(self.cenit), 11), 0), fontsize=35)
+
+        output_pdf = self.name + "RayTracing.png"
+        with PdfPages(output_pdf) as pdf:
+            pdf.savefig(fig)  
+
+        plt.show()
+
 #########################################################################       
 # FUNNCIONES A MEJORAR
 #########################################################################
