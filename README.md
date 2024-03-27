@@ -30,12 +30,7 @@ MUYSC is a muography simulation framework capable of rapidly estimating rough mu
 
 ## Installation
 
-Go to your terminal and type the command:
-
-```
-$ pip install MUYSC
-```
-See the documentation and examples included in this repository for information on how to use MUYSC in your own muography applications.
+Download the code files to your work space. See the documentation and examples included in this repository for information on how to use MUYSC in your own muography applications.
 
 
 ## Documentation :books:
