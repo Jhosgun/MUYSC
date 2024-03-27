@@ -17,67 +17,8 @@ MUYSC is a muography simulation framework capable of rapidly estimating rough mu
 * Download topography data of the geological structure.
 * Distances traveled in muon section
 * Calculation of the integrated muon flux
-<details>
-  <summary><h2>Parameter of the telescope</h2></summary>
+* Parameters of the telescope
 
-  
-This script, `telescopeParams.py`, provides a Python class to calculate several telescope parameters given the number of bars, pixel size, panel separation, and the distance from the volcano. 
-
-## Class: telescopeParams
-
-This class takes in the following parameters: 
-
-- `nBars`: Number of bars in the telescope
-- `d`: Pixel size in cm
-- `D`: Panel separation 
-- `L`: Distance from the volcano in meters
-
-The `telescopeParams` class contains several methods which are used to calculate various parameters of the telescope and display plots of these parameters.
-
-## Class Methods
-
-The methods in the class are as follows:
-
-- `__init__`: This is the constructor for the `telescopeParams` class.
-
-- `create_plot`: This method creates a plot of given data with labels, axes, and colorbars.
-
-- `solid_angle`: This method calculates the solid angle of the telescope given its parameters.
-
-- `N_pixel`: This method calculates the number of pixels given the telescope's parameters.
-
-- `acceptance`: This method calculates the acceptance of the telescope.
-
-- `S_pixels`: This method calculates the S_pixel parameter.
-
-- `create_subplot`: This method creates a subplot given data, a colorbar label, and an axis.
-
-- `plot_all_params`: This method creates a 2x2 grid of subplots containing the solid angle, number of pixels, acceptance, and S_pixel.
-
-## Example Usage:
-
-```python
-nBars_value = 40  # Assume some value for the number of bars
-d_value = 1  # Assume some value for pixel size in cm
-D_value = 150  # Assume some value for panel separation
-L_value = 50  # Assume some value for distance from the volcano in meters
-cmap = "jet" # Color map
-# Create an object of the telescopeParams class
-my_telescope = telescopeParams(nBars_value, d_value, D_value, L_value, cmap)
-
-# Calculate and plot different parameters of the telescope
-my_telescope.solid_angle()
-my_telescope.N_pixel()
-my_telescope.acceptance()
-my_telescope.S_pixels()
-my_telescope.plot_all_params()
-```
-In this example, an instance of `telescopeParams` is created with given parameter values. The different methods are then called on this instance to calculate the telescope parameters and plot them.
-
-Note: The plotting functions in this script rely on Matplotlib, so ensure you have that library installed before running.
-
-
-</details>
 
 
 ## Requirements

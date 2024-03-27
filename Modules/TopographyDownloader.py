@@ -2,7 +2,8 @@ import os
 import requests
 
 
-class TopographyDownloader:
+class TopographyData:
+
     def __init__(self, region_points):
         self.region_points = region_points
 
@@ -51,7 +52,4 @@ class TopographyDownloader:
             self.download_file(download_link)
 
 
-region_points = [37.738283, 37.781430,14.984277,15.016140]
-downloader = TopographyDownloader(region_points)
-downloader.download_to_path("/home/jorge/Desktop")
 
