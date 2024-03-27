@@ -2,7 +2,7 @@
 
 
 <div align="center">
-  <img src="MUYSC.png" alt="Ejemplo de imagen" width="800">
+  <img src="MUYSC.png" alt="Ejemplo de imagen" width="600">
 </div>
 
 
@@ -11,7 +11,7 @@ MUYSC is a muography simulation framework capable of rapidly estimating rough mu
 
 ## Modules 🔨
 
-<img src="Modulos.jpg" alt="Ejemplo de imagen" width="400">
+<img src="Modulos.jpg" alt="Ejemplo de imagen" width="600">
 
 
 * Download topography data of the geological structure.
