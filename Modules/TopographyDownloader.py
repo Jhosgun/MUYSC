@@ -9,7 +9,10 @@ class TopographyData:
 
     def format_coordinate(self, value, positive, negative):
         prefix = positive if value >= 0 else negative
-        abs_value = abs(int(value))
+        if value >= 0:
+            abs_value = abs(int(value))
+        else:
+            abs_value = abs(int(value))+1
         width = 2 if prefix in ('N', 'S') else 3
         return f"{prefix}{abs_value:0{width}}"
 

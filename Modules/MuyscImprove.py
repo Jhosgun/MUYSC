@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
+# %%
 
-# In[45]:
+# %%
 
 
 
@@ -73,6 +74,7 @@ class Mute(object):
     def inicialize_Topography(self,path):
         downloader = TopographyDownloader.TopographyData(self.regionPoints[:4])
         downloader.download_to_path(path)
+        print (path)
         
     def measure(self, lat1, lon1, lat2, lon2):  
         """Converting GMS coordinates to local meters.
@@ -173,7 +175,7 @@ class Mute(object):
         azimutP = azimut[2]
         
         # Equation creation
-        t = 4
+        t = 2 # Projection distance in km
         self.PjecX = self.obsPX+(self.RefPX-self.obsPX)*t
         self.PjecY = self.obsPY+(self.RefPY-self.obsPY)*t
         self.PjecZ = self.obsPZ+(self.RefPZ-self.obsPZ)*t
@@ -181,11 +183,11 @@ class Mute(object):
         
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"},figsize=(20,17)) 
         surf = ax.plot_surface(self.X, self.Y, self.lisZ, edgecolors='grey', alpha=0.5,  cmap=self.cmap,
-                            linewidth=0, antialiased=False, label='Cerro machín')
+                            linewidth=0, antialiased=False, label=self.name)
         
         # Plot points
-        ax.scatter(self.RefPX,self.RefPY,self.RefPZ, c="r")          # Reference point
-        ax.scatter(self.obsPX, self.obsPY, self.obsPZ, c="r")        # Telescope point
+        ax.scatter(self.RefPX,self.RefPY,self.RefPZ, s=20, c="r")          # Reference point
+        ax.scatter(self.obsPX, self.obsPY, self.obsPZ, c="k")        # Observer point
         ax.plot([self.obsPX,self.PjecX],[self.obsPY,self.PjecY],     # Line projection                                                  
                 [self.obsPZ,self.PjecZ], color="red")                      
         
@@ -197,7 +199,7 @@ class Mute(object):
         self.azimut = azimut
         self.cenit = cenit # corregir variable / creada para el funcionamiento de h flujo
         self.distances = np.zeros((cenitP,azimutP))
-        t = np.linspace(0,1,1000)
+        t = np.linspace(0,1,1000) # Projection lines in km
         for k,i in enumerate(azimut):
             for m,j in enumerate(cenit):
                 
@@ -211,16 +213,16 @@ class Mute(object):
                 
                 # Call function calculate distance and add to matrix distances 
                 self.distances[m][k]= self.calculate_distance(self.equationX,self.equationY,self.equationZ)
-                ax.plot(self.equationX,self.equationY,self.equationZ, color="black") # Line equation
+                ax.plot(self.equationX,self.equationY,self.equationZ, color="black", alpha=0.05) # Line equation
              
         # Labels                                            
         ax.tick_params(axis='both', which='major',labelrotation=20, rotation=25, labelsize=20)
         #ax.xlabel('longitud', fontsize=22, labelpad=20, rotation=10)
-        ax.set_xlabel("Longitud", fontsize=22, labelpad=30, rotation=10)
-        ax.set_ylabel("Latitud", fontsize=22, labelpad=30, rotation=-60)
-        ax.set_zlabel("Elevación", fontsize=22, labelpad=30) 
+        ax.set_xlabel("Longitude", fontsize=22, labelpad=30, rotation=10)
+        ax.set_ylabel("Latitude", fontsize=22, labelpad=30, rotation=-60)
+        ax.set_zlabel("Altitude", fontsize=22, labelpad=30) 
         
-        ax.set_title("Topografía del "+self.name, fontsize=25)
+        ax.set_title(self.name + " topography", fontsize=25)
         
         
                 # Save the 3D plot as a PDF file
@@ -309,9 +311,9 @@ class Mute(object):
         # Labels                                            
         ax.tick_params(axis='both', which='major',labelrotation=20, rotation=25, labelsize=20)
         #ax.xlabel('longitud', fontsize=22, labelpad=20, rotation=10)
-        ax.set_xlabel("Longitud", fontsize=22, labelpad=30, rotation=10)
-        ax.set_ylabel("Latitud", fontsize=22, labelpad=30, rotation=-60)
-        ax.set_zlabel("Elevación", fontsize=22, labelpad=30)
+        ax.set_xlabel("Longitude", fontsize=22, labelpad=30, rotation=10)
+        ax.set_ylabel("Latitude", fontsize=22, labelpad=30, rotation=-60)
+        ax.set_zlabel("Altitude", fontsize=22, labelpad=30)
         ax.set_title(self.name, fontsize=25)
         
         # Save the 3D plot as a PDF file
@@ -331,7 +333,7 @@ class Mute(object):
         
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"},figsize=(20,17)) 
         surf = ax.plot_surface(self.X, self.Y, self.lisZ, edgecolors='grey', alpha=0.5,  cmap=self.cmap,
-                            linewidth=0, antialiased=False, label='Cerro machín')
+                            linewidth=0, antialiased=False, label=self.name)
         
     # Plot points
         ax.scatter(self.RefPX,self.RefPY,self.RefPZ, c="black", s=100)     # Reference point
@@ -340,10 +342,10 @@ class Mute(object):
                             
         ax.tick_params(axis='both', which='major',labelrotation=20, rotation=25, labelsize=20)
         #ax.xlabel('longitud', fontsize=22, labelpad=20, rotation=10)
-        ax.set_xlabel("Longitud", fontsize=22, labelpad=30, rotation=10)
-        ax.set_ylabel("Latitud", fontsize=22, labelpad=30, rotation=-60)
-        ax.set_zlabel("Elevación", fontsize=22, labelpad=30) 
-        ax.set_title("Ubicación del telescopio sobre el "+self.name, fontsize=25)
+        ax.set_xlabel("Longitude", fontsize=22, labelpad=30, rotation=10)
+        ax.set_ylabel("Latitude", fontsize=22, labelpad=30, rotation=-60)
+        ax.set_zlabel("Altitude", fontsize=22, labelpad=30) 
+        ax.set_title("Observer at "+self.name, fontsize=25)
         
         
           # Save the 3D plot as a PDF file
@@ -372,9 +374,9 @@ class Mute(object):
         # Labels
   
         #ax.set_ylim([2200,3000])
-        ax.set_xlabel("Latitud", fontsize=25, labelpad=20)
-        ax.set_ylabel("Elevación", fontsize=25, labelpad=20)
-        ax.set_title('CERRO MACHÍN SECCIÓN', fontsize=25)                                 # Save the 3D plot as a PDF file
+        ax.set_xlabel("Latitude", fontsize=25, labelpad=20)
+        ax.set_ylabel("Altitude", fontsize=25, labelpad=20)
+        ax.set_title(self.name, fontsize=25)                                 # Save the 3D plot as a PDF file
         output_pdf = self.name + "section.pdf"
         with PdfPages(output_pdf) as pdf:
             pdf.savefig(fig)        
@@ -387,11 +389,11 @@ class Mute(object):
         """
         fig, ax = plt.subplots(figsize=(20,17))
         extent = (min(self.azimut), max(self.azimut), min(self.cenit),max(self.cenit))
-        im = ax.imshow(self.distances, interpolation='nearest', extent=extent, origin='upper', cmap=self.cmap)
+        im = ax.imshow(self.distances/1000.0, interpolation='nearest', extent=extent, origin='upper', cmap=self.cmap)
         #im = ax.imshow(self.distances, interpolation='nearest', origin='upper', cmap=self.cmap)
-        ax.set_xlabel("Azimuth [degree]", fontsize = 25)
-        ax.set_ylabel("Zenith [degree]", fontsize = 25)
-        ax.set_title("Distancia recorrida "+self.name, fontsize = 25)
+        ax.set_xlabel("Azimuth [degree]", fontsize = 20)
+        ax.set_ylabel("Zenith [degree]", fontsize = 20)
+        ax.set_title(self.name + " rock thickness", fontsize = 20)
 
         # Create an axes on the right side of ax. The width of cax will be 5%
         # of ax and the padding between cax and ax will be fixed at 0.05 inch.
@@ -400,7 +402,7 @@ class Mute(object):
 
         # Color bar
         clb = plt.colorbar(im, cax=cax)
-        clb.set_label('d [m]', fontsize = 25)
+        clb.set_label('d [km]', fontsize = 20)
         clb.ax.tick_params(labelsize = 20)
         
         
@@ -411,14 +413,14 @@ class Mute(object):
         contour_lines = ax.contour(self.distances, contour_levels, colors='k', origin='upper', extent=extent)
 
         # Add labels to contour lines
-        ax.clabel(contour_lines, inline=True, fontsize=10, colors='white')
+        ax.clabel(contour_lines, inline=True, fontsize=12, colors='k')
         
 
         labelsx = np.round(np.linspace(min(self.azimut), max(self.azimut), 11),0)
         labelsy = np.round(np.linspace(min(self.cenit), max(self.cenit), 11),0)
 
-        ax.set_xticks(labelsx, fontsize = 35)
-        ax.set_yticks(labelsy, fontsize = 35)
+        # ax.set_xticks(labelsx, fontsize = 35)
+        # ax.set_yticks(labelsy, fontsize = 35)
 
         output_pdf = self.name + "RayTracing.png"
         with PdfPages(output_pdf) as pdf:
@@ -436,7 +438,7 @@ class Mute(object):
 
         ax.set_xlabel("Azimuth [degree]", fontsize = 25)
         ax.set_ylabel("Zenith [degree]", fontsize = 25)
-        ax.set_title("Distancia recorrida "+self.name, fontsize = 25)
+        ax.set_title("Rock thickness "+self.name, fontsize = 25)
 
         # Create an axes on the right side of ax. The width of cax will be 5%
         # of ax and the padding between cax and ax will be fixed at 0.05 inch.
@@ -534,5 +536,5 @@ class Mute(object):
                     indexX.append(lisLat[i])
                     indexY.append(lisLong[j])
         return indexX,indexY
-     
-  
+
+
