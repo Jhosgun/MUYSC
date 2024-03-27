@@ -89,12 +89,7 @@ Note: The plotting functions in this script rely on Matplotlib, so ensure you ha
 
 ## Installation
 
-Go to your terminal and type the command:
-
-```
-$ pip install MUYSC
-```
-See the documentation and examples included in this repository for information on how to use MUYSC in your own muography applications.
+Download the code files to your work space. See the documentation and examples included in this repository for information on how to use MUYSC in your own muography applications.
 
 
 ## Documentation :books:
