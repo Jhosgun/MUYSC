@@ -2,7 +2,7 @@
 
 
 <div align="center">
-  <img src="MUYSC.png" alt="Ejemplo de imagen" width="600">
+  <img src="MUYSC.png" alt="Ejemplo de imagen" width="800">
 </div>
 
 
