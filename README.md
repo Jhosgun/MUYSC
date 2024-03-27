@@ -36,6 +36,8 @@ Download the code files to your work space. See the documentation and examples i
 ## Documentation :books:
 The documentation will be available in [Mute page](https://halley.uis.edu.co/fuego/muysc/) and in the [wiki](https://github.com/Jhosgun/MUYSC/wiki) of this repository.
 
+## Tomography repository
+The tomography repository is found in [MUYSC Tomo](https://github.com/Delaican/MUYSC).
 
 ## Contribution
 Contributions to the MUYSC project are welcome. Please follow the guidelines below to contribute:
