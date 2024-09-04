@@ -160,6 +160,10 @@ class Mute(object):
             self.RefPX=RefPoint[1]
             self.RefPY=RefPoint[0]
             self.RefPZ=srtm1_data.get_altitude(latitude=self.RefPY, longitude=self.RefPX)
+
+        self.R = self.measure(self.obsPX, self.obsPY, self.RefPX, self.RefPY)
+        self.RefZEN = np.arccos((self.RefPZ - self.obsPZ)/self.R)*180.0/np.pi
+        print ("Elevation = %f" % (90.0 - self.RefZEN))
          
         
     def plot_lines(self, cenit, azimut): 
@@ -175,7 +179,7 @@ class Mute(object):
         azimutP = azimut[2]
         
         # Equation creation
-        t = 2 # Projection distance in km
+        t = 3 # Projection distance in km
         self.PjecX = self.obsPX+(self.RefPX-self.obsPX)*t
         self.PjecY = self.obsPY+(self.RefPY-self.obsPY)*t
         self.PjecZ = self.obsPZ+(self.RefPZ-self.obsPZ)*t
@@ -388,7 +392,7 @@ class Mute(object):
         """ This function plot the distance traversed in geological structured
         """
         fig, ax = plt.subplots(figsize=(20,17))
-        extent = (min(self.azimut), max(self.azimut), min(self.cenit),max(self.cenit))
+        extent = (min(self.azimut), max(self.azimut), self.RefZEN - min(self.cenit), self.RefZEN - max(self.cenit))
         im = ax.imshow(self.distances/1000.0, interpolation='nearest', extent=extent, origin='upper', cmap=self.cmap)
         #im = ax.imshow(self.distances, interpolation='nearest', origin='upper', cmap=self.cmap)
         ax.set_xlabel("Azimuth [degree]", fontsize = 20)
@@ -416,13 +420,12 @@ class Mute(object):
         ax.clabel(contour_lines, inline=True, fontsize=12, colors='k')
         
 
-        labelsx = np.round(np.linspace(min(self.azimut), max(self.azimut), 11),0)
-        labelsy = np.round(np.linspace(min(self.cenit), max(self.cenit), 11),0)
+        # labelsx = np.round(np.linspace(min(self.azimut), max(self.azimut), 11),0)
+        # labelsy = np.round(np.linspace(self.RefZEN + max(self.cenit), self.RefZEN + min(self.cenit), 11),0)
 
-        # ax.set_xticks(labelsx, fontsize = 35)
-        # ax.set_yticks(labelsy, fontsize = 35)
 
         output_pdf = self.name + "RayTracing.png"
+        
         with PdfPages(output_pdf) as pdf:
             pdf.savefig(fig)  
 
@@ -437,7 +440,7 @@ class Mute(object):
         im = ax.imshow(self.distances, interpolation='nearest', origin='upper', cmap=self.cmap)
 
         ax.set_xlabel("Azimuth [degree]", fontsize = 25)
-        ax.set_ylabel("Zenith [degree]", fontsize = 25)
+        ax.set_ylabel("Elevation [degree]", fontsize = 25)
         ax.set_title("Rock thickness "+self.name, fontsize = 25)
 
         # Create an axes on the right side of ax. The width of cax will be 5%
@@ -467,8 +470,8 @@ class Mute(object):
         ax.set_yticks(labelsy_indices)
 
         # Put the actual azimuth and zenith values as labels
-        ax.set_xticklabels(np.round(np.linspace(min(self.azimut), max(self.azimut), 11), 0), fontsize=35)
-        ax.set_yticklabels(np.round(np.linspace(min(self.cenit), max(self.cenit), 11), 0), fontsize=35)
+        ax.set_xticklabels(np.round(np.linspace(min(self.azimut), max(self.azimut), 11), 0), fontsize=20)
+        ax.set_yticklabels(np.round(np.linspace(90.0 - self.RefZEN + max(self.cenit), 90.0 - self.RefZEN + min(self.cenit), 11), 0), fontsize=20)
 
         output_pdf = self.name + "RayTracing.png"
         with PdfPages(output_pdf) as pdf:
