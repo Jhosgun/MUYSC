@@ -10,6 +10,7 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import scipy.ndimage as ndimage
 from matplotlib.backends.backend_pdf import PdfPages
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib as mpl
 import re
 
 class telescopeParams:
@@ -45,42 +46,68 @@ class telescopeParams:
         theta = self.theta 
         Nd = self.Nd  
 
-        
-        fig = plt.figure(figsize=(35, 8))
-        ax = fig.add_subplot(131)
-        ax.set_xlabel("$\Theta_x$ [deg]", fontsize = 25)
-        ax.set_ylabel("$\Theta_y$ [deg]", fontsize = 25)
-        plt.title(self.name, fontsize = 30)
-        
-        
-        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-   
+        fig, ax = plt.subplots(figsize=(10,7))
         extent=(-nBars*theta,nBars*theta,-nBars*theta,nBars*theta)
-        im = plt.imshow(data, interpolation='nearest', extent=extent, origin='lower', cmap=self.color)
-    
+        im = ax.imshow(data, interpolation='nearest', extent=extent, origin='upper', cmap="jet")
+        ax.set_xlabel("$\Theta_x$ [deg]", fontsize = 15)
+        ax.set_ylabel("$\Theta_y$ [deg]", fontsize = 15)
+        ax.set_title(self.name, fontsize = 15)
+
         # Color bar
-     
-        clb = plt.colorbar()
-        clb.set_label(colorbar_label, fontsize = 25)
-        clb.ax.tick_params(labelsize = 20)
-    
-        # Set tick labels
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.1)
+
+        # Color bar
+        clb = plt.colorbar(im, cax=cax)
+        clb.set_label(colorbar_label, fontsize = 15)
+        clb.ax.tick_params(labelsize = 12)
+
+
         labelsx = np.round(np.linspace(-nBars*theta, nBars*theta, 11),1)
         labelsy = np.round(np.linspace(-nBars*theta, nBars*theta, 11),1)
-        ax.set_xticklabels(labelsx.astype(int))
-        ax.set_yticklabels(labelsy.astype(int))
-    
-        # Center location
-        plt.axvline(x=0, color='k', lw=1, linestyle='--')
-        plt.axhline(y=0, color='k', lw=1, linestyle='--')
-    
-        # Increase tick labels
-        ax.tick_params(axis='both', which='major', labelsize=15)
         
-        plt.tight_layout()
+        output_pdf = self.name + colorbar_label + ".png"
+        with PdfPages(output_pdf) as pdf:
+            pdf.savefig(fig)  
+
+        plt.show()
         
-        plt.savefig(self.name + colorbar_label + '.png', bbox_inches='tight')
+#         fig = plt.figure(figsize=(10, 7))
+#         ax = fig.add_subplot(131)
+#         ax.set_xlabel("$\Theta_x$ [deg]", fontsize = 15)
+#         ax.set_ylabel("$\Theta_y$ [deg]", fontsize = 15)
+#         plt.title(self.name, fontsize = 15)
+        
+        
+#         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+#         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+   
+#         extent=(-nBars*theta,nBars*theta,-nBars*theta,nBars*theta)
+#         im = plt.imshow(data, interpolation='nearest', extent=extent, origin='lower', cmap=self.color)
+    
+#         # Color bar
+     
+#         clb = plt.colorbar()
+#         clb.set_label(colorbar_label, fontsize = 15)
+#         clb.ax.tick_params(labelsize = 12)
+    
+#         # Set tick labels
+#         labelsx = np.round(np.linspace(-nBars*theta, nBars*theta, 11),1)
+#         labelsy = np.round(np.linspace(-nBars*theta, nBars*theta, 11),1)
+#         ax.set_xticklabels(labelsx.astype(int))
+#         ax.set_yticklabels(labelsy.astype(int))
+    
+#         # Center location
+#         plt.axvline(x=0, color='k', lw=1, linestyle='--')
+#         plt.axhline(y=0, color='k', lw=1, linestyle='--')
+    
+#         # Increase tick labels
+#         ax.tick_params(axis='both', which='major', labelsize=15)
+        
+#         plt.tight_layout()
+        
+#         plt.savefig(self.name + colorbar_label + '.png', bbox_inches='tight')
+        
         
     def solid_angle(self):
         """
@@ -121,8 +148,12 @@ class telescopeParams:
         delta_x = self.L*np.tan(delta_theta)
         self.delta_theta = delta_theta
         self.delta_x = delta_x
-        # Graficar 
-        #self.create_plot(self.solid_Ang*1000, 'Solid angle [x10$^{-3}$sr]')
+
+        self.create_plot(self.solid_Ang*1000, 'Solid angle [x10$^{-3}$sr]')
+        
+        return self.solid_Ang
+        
+
 
         
     def N_pixel(self):
@@ -156,23 +187,18 @@ class telescopeParams:
         
                         self.n_Pixel[h+C,b+C]= self.n_Pixel[h+C,b+C] + 1
                         
-       
-
-        #self.create_plot(self.r, 'r[cm]')
 
 
-    def acceptanceplot(self):
+    def acceptance(self):
         """
         Calculates the acceptance of the telescope.
         """
         
         self.acceptance = self.n_Pixel * self.solid_Ang * self.A / 4
-        
-       
-        
+
         self.create_plot(self.acceptance,'Acceptance [cm$^2$sr]')
         
-   
+        return self.acceptance
             
             
     def S_pixels(self):
@@ -264,5 +290,5 @@ class telescopeParams:
             pdf.savefig(fig)
             
         plt.show()
-        
+
 

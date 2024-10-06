@@ -4,8 +4,6 @@
 
 # %%
 
-
-
 # -*- encoding: latin1 -*-
 
 """-------------------------------------
@@ -19,11 +17,9 @@ The structre of MUTE
 Updated: Frebrary 28, 2021
 """
 
-
 """
-Full documentation at:
+Full documentation at: https://github.com/Jhosgun/MUYSC/wiki
 """
-#import import_ipynb
 
 import os
 import requests
@@ -96,8 +92,7 @@ class Mute(object):
 
         a = np.sin(delta_lat / 2) ** 2 + np.cos(lat1_rad) * np.cos(lat2_rad) * np.sin(delta_lon / 2) ** 2
         c = 2 * math.atan2(np.sqrt(a), np.sqrt(1 - a))
-        distance = EARTH_RADIUS * c                                                                                                                                                          
-
+        distance = EARTH_RADIUS * c                                                                                                                       
         return distance * 1000  # Convert distance to meters
 
 
@@ -196,7 +191,7 @@ class Mute(object):
                 [self.obsPZ,self.PjecZ], color="red")                      
         
         
-        # Plot lines of muons
+        # Plot muon flux projections
 
         cenit = np.linspace(cenitS,cenitF,cenitP)
         azimut = np.linspace(azimutF,azimutS,azimutP)
@@ -228,18 +223,12 @@ class Mute(object):
         
         ax.set_title(self.name + " topography", fontsize=25)
         
-        
-                # Save the 3D plot as a PDF file
+        # Save the 3D plot as a PDF file
         output_pdf = self.name + "Structure.pdf"
         with PdfPages(output_pdf) as pdf:
             pdf.savefig(fig)
             
-            
-            
         plt.show()
-        
-        
-        
                 
         Lmcenit = []
         Lmazimut = []
@@ -256,13 +245,20 @@ class Mute(object):
         self.matrixDatos = matrixDatos
     
     def Flux(self):
-        Flux = FluxModels.FluxIntegrated(self.matrixDatos)
-        Flux.showData()
-        Flux.OpenSky()
-        Flux.Elevation(self.obsPX,self.RefPX,self.obsPY,self.RefPY,self.obsPZ,self.RefPZ)
-        Flux.ShowIntegratedFlux()
-        Flux.ShowOpacity()
-        Flux.ShowDensity()
+        self.Flux = FluxModels.FluxIntegrated(self.matrixDatos)
+        self.Flux.showData()
+        self.Flux.Elevation(self.obsPX,self.RefPX,self.obsPY,self.RefPY,self.obsPZ,self.RefPZ)
+        self.Flux.OpenSky()
+        Cross_Flux, Open_Flux = self.Flux.ShowIntegratedFlux()
+        # Flux.ShowOpacity()
+        # Flux.ShowDensity()
+
+        return Cross_Flux, Open_Flux
+    
+    def Transmission(self):
+        
+        return self.Flux.Transmission()
+    
         
     def calculate_distance(self,equationX,equationY,equationZ):
         """ This function calculate the distance for each point
@@ -298,10 +294,7 @@ class Mute(object):
             d+=dtemp
         return d
     
-    
-#########################################################################       
-# FUNNCIONES QUE GRAFICAN
-######################################################################### 
+# Plotting functions
     
     def plot_structure(self): 
         """Plot the geological structure
@@ -327,9 +320,7 @@ class Mute(object):
 
         # Display the 3D plot
         plt.show()
-
-        
-        
+   
         
     def plot_points(self): 
         """ Plot the geological structure with the moun's lines
@@ -360,10 +351,6 @@ class Mute(object):
         plt.show()
         
         
-   
-    
-    
-    
     def section(self):
         """ This function plot the section of the geolical structure traversed
         """
@@ -391,40 +378,44 @@ class Mute(object):
     def show_distances(self):
         """ This function plot the distance traversed in geological structured
         """
-        fig, ax = plt.subplots(figsize=(20,17))
-        extent = (min(self.azimut), max(self.azimut), self.RefZEN - min(self.cenit), self.RefZEN - max(self.cenit))
-        im = ax.imshow(self.distances/1000.0, interpolation='nearest', extent=extent, origin='upper', cmap=self.cmap)
-        #im = ax.imshow(self.distances, interpolation='nearest', origin='upper', cmap=self.cmap)
-        ax.set_xlabel("Azimuth [degree]", fontsize = 20)
-        ax.set_ylabel("Zenith [degree]", fontsize = 20)
-        ax.set_title(self.name + " rock thickness", fontsize = 20)
+        fig, ax = plt.subplots(figsize=(10,7))
+        im = ax.imshow(self.distances/1e3, interpolation='nearest', origin='upper', cmap=self.cmap)
+        ax.set_xlabel("Azimuth [degree]", fontsize = 15)
+        ax.set_ylabel("Zenith [degree]", fontsize = 15)
+        ax.set_title("Rock thickness : "+self.name, fontsize = 15)
 
         # Create an axes on the right side of ax. The width of cax will be 5%
-        # of ax and the padding between cax and ax will be fixed at 0.05 inch.
+        # of ax and the padding between cax and ax will be fixed at 0.1 inch.
         divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cax = divider.append_axes("right", size="5%", pad=0.1)
 
         # Color bar
         clb = plt.colorbar(im, cax=cax)
-        clb.set_label('d [km]', fontsize = 20)
-        clb.ax.tick_params(labelsize = 20)
+        clb.set_label('d [km]', fontsize = 15)
+        clb.ax.tick_params(labelsize = 12)
         
         
         # Define contour levels
-        contour_levels = np.linspace(self.distances.min(), self.distances.max(), 4)  # 4 contour lines
+        contour_levels = np.linspace(self.distances.min()/1e3, self.distances.max()/1e3, 4)  # 4 contour lines
 
         # Draw contour lines
-        contour_lines = ax.contour(self.distances, contour_levels, colors='k', origin='upper', extent=extent)
+        contour_lines = ax.contour(self.distances/1e3, contour_levels, colors='k')
 
         # Add labels to contour lines
         ax.clabel(contour_lines, inline=True, fontsize=12, colors='k')
+
         
+        labelsx_indices = np.linspace(0, self.distances.shape[1]-1, 11).astype(int)
+        labelsy_indices = np.linspace(0, self.distances.shape[0]-1, 11).astype(int)
 
-        # labelsx = np.round(np.linspace(min(self.azimut), max(self.azimut), 11),0)
-        # labelsy = np.round(np.linspace(self.RefZEN + max(self.cenit), self.RefZEN + min(self.cenit), 11),0)
+        ax.set_xticks(labelsx_indices)
+        ax.set_yticks(labelsy_indices)
 
+        # Put the actual azimuth and zenith values as labels
+        ax.set_xticklabels(np.round(np.linspace(min(self.azimut), max(self.azimut), 11), 0), fontsize=12)
+        ax.set_yticklabels(np.round(np.linspace(self.RefZEN + min(self.cenit),self.RefZEN + max(self.cenit), 11), 0), fontsize=12)
 
-        output_pdf = self.name + "RayTracing.png"
+        output_pdf = self.name + "Rock_Thickness_Zenith.png"
         
         with PdfPages(output_pdf) as pdf:
             pdf.savefig(fig)  
@@ -435,29 +426,29 @@ class Mute(object):
         
         """ This function plot the distance traversed in geological structured
         """
-        fig, ax = plt.subplots(figsize=(20,17))
+        fig, ax = plt.subplots(figsize=(10,7))
 
-        im = ax.imshow(self.distances, interpolation='nearest', origin='upper', cmap=self.cmap)
+        im = ax.imshow(self.distances/1e3, interpolation='nearest', origin='upper', cmap=self.cmap)
 
-        ax.set_xlabel("Azimuth [degree]", fontsize = 25)
-        ax.set_ylabel("Elevation [degree]", fontsize = 25)
-        ax.set_title("Rock thickness "+self.name, fontsize = 25)
+        ax.set_xlabel("Azimuth [degree]", fontsize = 15)
+        ax.set_ylabel("Elevation [degree]", fontsize = 15)
+        ax.set_title("Rock thickness : "+self.name, fontsize = 15)
 
         # Create an axes on the right side of ax. The width of cax will be 5%
-        # of ax and the padding between cax and ax will be fixed at 0.05 inch.
+        # of ax and the padding between cax and ax will be fixed at 0.1 inch.
         divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cax = divider.append_axes("right", size="5%", pad=0.1)
 
         # Color bar
         clb = plt.colorbar(im, cax=cax)
-        clb.set_label('d [m]', fontsize = 25)
-        clb.ax.tick_params(labelsize = 20)
+        clb.set_label('d [km]', fontsize = 15)
+        clb.ax.tick_params(labelsize = 12)
 
         # Define contour levels
-        contour_levels = np.linspace(self.distances.min(), self.distances.max(), 4)  # 4 contour lines
+        contour_levels = np.linspace(self.distances.min()/1e3, self.distances.max()/1e3, 4)  # 4 contour lines
 
         # Draw contour lines (without specifying origin)
-        contour_lines = ax.contour(self.distances, contour_levels, colors='k')
+        contour_lines = ax.contour(self.distances/1e3, contour_levels, colors='k')
 
         # Add labels to contour lines
         ax.clabel(contour_lines, inline=True, fontsize=10, colors='white')
@@ -470,18 +461,54 @@ class Mute(object):
         ax.set_yticks(labelsy_indices)
 
         # Put the actual azimuth and zenith values as labels
-        ax.set_xticklabels(np.round(np.linspace(min(self.azimut), max(self.azimut), 11), 0), fontsize=20)
-        ax.set_yticklabels(np.round(np.linspace(90.0 - self.RefZEN + max(self.cenit), 90.0 - self.RefZEN + min(self.cenit), 11), 0), fontsize=20)
+        ax.set_xticklabels(np.round(np.linspace(min(self.azimut), max(self.azimut), 11), 0), fontsize=12)
+        ax.set_yticklabels(np.round(np.linspace(90.0 - self.RefZEN + max(self.cenit), 90.0 - self.RefZEN + min(self.cenit), 11), 0), fontsize=12)
 
-        output_pdf = self.name + "RayTracing.png"
+        output_pdf = self.name + "Rock_Thickness_Elevation.png"
         with PdfPages(output_pdf) as pdf:
             pdf.savefig(fig)  
 
         plt.show()
 
-#########################################################################       
-# FUNNCIONES A MEJORAR
-#########################################################################
+    
+    def plot_mesured_flux(self, data, plot_label, plot_units):
+        """ This function plot a variable in the observation frame
+        """
+        fig, ax = plt.subplots(figsize=(10,7))
+        im = ax.imshow(data, interpolation='nearest', origin='upper', cmap=self.cmap, norm=mpl.colors.LogNorm())
+        ax.set_xlabel("Azimuth [degree]", fontsize = 15)
+        ax.set_ylabel("Zenith [degree]", fontsize = 15)
+        ax.set_title(plot_label, fontsize = 15)
+
+        # Create an axes on the right side of ax. The width of cax will be 5%
+        # of ax and the padding between cax and ax will be fixed at 0.1 inch.
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.1)
+
+        # Color bar
+        clb = plt.colorbar(im, cax=cax)
+        clb.set_label(plot_label + plot_units, fontsize = 15)
+        clb.ax.tick_params(labelsize = 12)
+        
+        
+        labelsx_indices = np.linspace(0, data.shape[1]-1, 11).astype(int)
+        labelsy_indices = np.linspace(0, data.shape[0]-1, 11).astype(int)
+
+        ax.set_xticks(labelsx_indices)
+        ax.set_yticks(labelsy_indices)
+
+        # Put the actual azimuth and zenith values as labels
+        ax.set_xticklabels(np.round(np.linspace(min(self.azimut), max(self.azimut), 11), 0), fontsize=12)
+        ax.set_yticklabels(np.round(np.linspace(self.RefZEN + min(self.cenit),self.RefZEN + max(self.cenit), 11), 0), fontsize=12)
+
+        output_pdf = self.name + plot_label + ".png"
+        
+        with PdfPages(output_pdf) as pdf:
+            pdf.savefig(fig)  
+
+        plt.show()
+        
+# Functions on progress
    
     def save_data(self,file_name):
         """ This function save .dat data 

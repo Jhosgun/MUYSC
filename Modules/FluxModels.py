@@ -13,6 +13,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy import signal
 import matplotlib as mpl
 from matplotlib.ticker import FuncFormatter
+import timeit
 
 # This class will make end-to-end simulation of the muography 
 class FluxIntegrated(object):
@@ -32,7 +33,8 @@ class FluxIntegrated(object):
     def showData(self):
         self.azimuth = self.matrix[:,1]
         self.cenith = self.matrix[:,0] * -1
-        self.z = np.abs(self.matrix[:,2].reshape(50,50))/1000
+        self.Np = 99
+        self.z = np.abs(self.matrix[:,2].reshape(self.Np,self.Np))/1000
         """
         print("Azimuth")
         print(self.azimuth)
@@ -101,35 +103,15 @@ class FluxIntegrated(object):
 
         Open_Sky = Open_Sky*dE
         Int_flux = Int_flux*dE
-        
-      
                     
         return  Int_flux*86400, Open_Sky*86400
     
-    def OpenSky(self):
-        
-        cenith_matrix = self.cenith.reshape(50,50)
-        self.cenith_matrix = cenith_matrix
-        fig = plt.figure(figsize=(20, 5))
-        extent = (min(self.azimuth)*180/np.pi, max(self.azimuth)*180/np.pi,min(self.cenith)*180/np.pi,max(self.cenith)*180/np.pi)
-        plt.imshow(cenith_matrix*180/np.pi, interpolation='nearest', extent=extent, origin='upper')
-        plt.xlabel("Azimuth [degree]", fontsize = 25)
-        plt.ylabel("Zenith [degree]", fontsize = 25)
 
-        # Color bar
-        clb = plt.colorbar()
-        clb.set_label('Aperture [degree]', fontsize = 25)
-        clb.ax.tick_params(labelsize = 20)
-
-        labelsx = np.round(np.linspace(min(self.azimuth)*180/np.pi, max(self.azimuth)*180/np.pi, 11),0)
-        labelsy = np.round(np.linspace(min(self.cenith)*180/np.pi, max(self.cenith)*180/np.pi, 11),0)
-
-        plt.xticks(labelsx, fontsize = 15)
-        plt.yticks(labelsy, fontsize = 15)
-
-        plt.show()
-        
     def Elevation(self,Longitude1,Longitude2,Latitude1,Latitude2,Altitude1,Altitude2):
+        
+        cenith_matrix = self.cenith.reshape(self.Np,self.Np)
+        self.cenith_matrix = cenith_matrix
+        
         Ce = 40075 # Earth circunference km
         X = Ce*(Longitude1-Longitude2)*np.cos((Latitude1-Latitude2)*np.pi/180.0)/360.0 # Lenght Longitud
         Y = Ce*(Latitude1-Latitude2)/360.0 # Lenght Latitude
@@ -138,11 +120,9 @@ class FluxIntegrated(object):
         Elevation = np.arctan(V/H)
         print ("Elevation : %f" % (Elevation*180/np.pi))
         
-        import timeit
-
         start = timeit.default_timer()
 
-        N = 50
+        N = self.Np
         Trav_Flux = np.zeros((N,N))
         Open_Sky_Flux = np.zeros((N,N))
         cenithal = np.zeros((N,N))
@@ -153,15 +133,15 @@ class FluxIntegrated(object):
 
                 A, B = self.int_flux(self.z[i,j]*1000, cenithal[i,j])
 
-
                 Trav_Flux[i,j] = A
                 Open_Sky_Flux[i,j] = B 
 
         stop = timeit.default_timer()
-
         print('Time: %f s'% (stop - start))
+        
         self.Trav_Flux = Trav_Flux
         self.cenithal = cenithal
+        self.Open_Sky = Open_Sky_Flux
         
         Opacity = np.zeros((N,N))
         Density = np.zeros((N,N))
@@ -184,22 +164,66 @@ class FluxIntegrated(object):
         self.Opacity = Opacity
         self.Density = Density
         
-    def ShowIntegratedFlux(self):
-        fig, ax = plt.subplots(figsize=(20,17))
+    def OpenSky(self):
+        
+
+        fig, ax = plt.subplots(figsize=(10,7))
         extent = (min(self.azimuth)*180/np.pi, max(self.azimuth)*180/np.pi, np.max(self.cenithal), np.min(self.cenithal))
-        im = ax.imshow(self.Trav_Flux, interpolation='nearest', extent=extent, origin='upper',norm=mpl.colors.LogNorm(), cmap="jet")
-        ax.set_xlabel("Azimuth [degree]", fontsize = 25)
-        ax.set_ylabel("Zenith [degree]", fontsize = 25)
-        ax.set_title("Flujo Integrado", fontsize = 25)
+        im = ax.imshow(self.Open_Sky, interpolation='nearest', extent=extent, origin='upper',norm=mpl.colors.LogNorm(), cmap="jet")
+        ax.set_xlabel("Azimuth [degree]", fontsize = 15)
+        ax.set_ylabel("Zenith [degree]", fontsize = 15)
+        ax.set_title("Open Sky Flux", fontsize = 15)
 
         # Color bar
         divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cax = divider.append_axes("right", size="5%", pad=0.1)
 
         # Color bar
         clb = plt.colorbar(im, cax=cax)
-        clb.set_label('Integrated Flux [$cm^{-2}sr^{-1}day^{-1}$]', fontsize = 25)
-        clb.ax.tick_params(labelsize = 20)
+        clb.set_label('Open Sky Flux [cm$^{-2}$sr$^{-1}$day$^{-1}$]', fontsize = 15)
+        clb.ax.tick_params(labelsize = 12)
+
+        # Define contour levels
+        contour_levels = np.logspace(np.log10(self.Open_Sky.min()), np.log10(self.Open_Sky.max()/2), 5)  # 4 contour lines in log scale
+
+        # Draw contour lines
+        contour_lines = ax.contour(self.Open_Sky, contour_levels, colors='k', origin='upper', extent=extent)
+
+        # Formatter function for contour labels
+        formatter = FuncFormatter(lambda x, pos: "{:.1e}".format(x))
+
+        # Add labels to contour lines
+        ax.clabel(contour_lines, inline=True, fontsize=10, colors='black', fmt=formatter)
+
+        labelsx = np.round(np.linspace(min(self.azimuth)*180/np.pi, max(self.azimuth)*180/np.pi, 11),0)
+        labelsy = np.round(np.linspace(np.max(self.cenithal), np.min(self.cenithal),  11),0)
+
+        
+        output_pdf = "Open_Sky_Flux.png"
+        with PdfPages(output_pdf) as pdf:
+            pdf.savefig(fig)  
+
+        plt.show()
+
+
+        
+    def ShowIntegratedFlux(self):
+        
+        fig, ax = plt.subplots(figsize=(10,7))
+        extent = (min(self.azimuth)*180/np.pi, max(self.azimuth)*180/np.pi, np.max(self.cenithal), np.min(self.cenithal))
+        im = ax.imshow(self.Trav_Flux, interpolation='nearest', extent=extent, origin='upper',norm=mpl.colors.LogNorm(), cmap="jet")
+        ax.set_xlabel("Azimuth [degree]", fontsize = 15)
+        ax.set_ylabel("Zenith [degree]", fontsize = 15)
+        ax.set_title("Integrated Flux", fontsize = 15)
+
+        # Color bar
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.1)
+
+        # Color bar
+        clb = plt.colorbar(im, cax=cax)
+        clb.set_label('Integrated Flux [cm$^{-2}$sr$^{-1}$day$^{-1}$]', fontsize = 15)
+        clb.ax.tick_params(labelsize = 12)
 
         # Define contour levels
         contour_levels = np.logspace(np.log10(self.Trav_Flux.min()), np.log10(self.Trav_Flux.max()/2), 5)  # 4 contour lines in log scale
@@ -215,17 +239,47 @@ class FluxIntegrated(object):
 
         labelsx = np.round(np.linspace(min(self.azimuth)*180/np.pi, max(self.azimuth)*180/np.pi, 11),0)
         labelsy = np.round(np.linspace(np.max(self.cenithal), np.min(self.cenithal),  11),0)
-
-        ax.set_xticks(labelsx, fontsize = 15)
-        ax.set_yticks(labelsy, fontsize = 15)
-        #output_pdf = self.name + "IntegratedFlux.png"
-        output_pdf = "IntegratedFlux.png"
+        
+        output_pdf = "Integrated_Flux.png"
         with PdfPages(output_pdf) as pdf:
             pdf.savefig(fig)  
 
         plt.show()
 
+        return self.Trav_Flux, self.Open_Sky
+
+    
+    def Transmission(self):
         
+        self.transmission = self.Trav_Flux/self.Open_Sky
+        
+        fig, ax = plt.subplots(figsize=(10,7))
+        extent = (min(self.azimuth)*180/np.pi, max(self.azimuth)*180/np.pi, np.max(self.cenithal), np.min(self.cenithal))
+        im = ax.imshow(self.transmission, interpolation='nearest', extent=extent, origin='upper',norm=mpl.colors.LogNorm(), cmap="jet")
+        ax.set_xlabel("Azimuth [degree]", fontsize = 15)
+        ax.set_ylabel("Zenith [degree]", fontsize = 15)
+        ax.set_title("Transmission", fontsize = 15)
+
+        # Color bar
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.1)
+
+        # Color bar
+        clb = plt.colorbar(im, cax=cax)
+        clb.set_label('Transmission', fontsize = 15)
+        clb.ax.tick_params(labelsize = 12)
+
+        labelsx = np.round(np.linspace(min(self.azimuth)*180/np.pi, max(self.azimuth)*180/np.pi, 11),0)
+        labelsy = np.round(np.linspace(np.max(self.cenithal), np.min(self.cenithal),  11),0)
+
+        output_pdf = "Transmission.png"
+        
+        with PdfPages(output_pdf) as pdf:
+            pdf.savefig(fig)  
+
+        plt.show()
+        
+        return self.transmission
         
     def ShowDensity(self):
         fig, ax = plt.subplots(figsize=(20,17))
@@ -258,8 +312,8 @@ class FluxIntegrated(object):
         labelsx = np.round(np.linspace(min(self.azimuth)*180/np.pi, max(self.azimuth)*180/np.pi, 11),0)
         labelsy = np.round(np.linspace(np.max(self.cenithal), np.min(self.cenithal),  11),0)
 
-        ax.set_xticks(labelsx, fontsize = 15)
-        ax.set_yticks(labelsy, fontsize = 15)
+        # ax.set_xticks(labelsx, fontsize = 15)
+        # ax.set_yticks(labelsy, fontsize = 15)
 
         output_pdf = "Density.png"
         with PdfPages(output_pdf) as pdf:
@@ -304,8 +358,8 @@ class FluxIntegrated(object):
         labelsx = np.round(np.linspace(min(self.azimuth)*180/np.pi, max(self.azimuth)*180/np.pi, 11),0)
         labelsy = np.round(np.linspace(np.max(self.cenithal), np.min(self.cenithal),  11),0)
 
-        ax.set_xticks(labelsx, fontsize = 15)
-        ax.set_yticks(labelsy, fontsize = 15)
+        # ax.set_xticks(labelsx, fontsize = 15)
+        # ax.set_yticks(labelsy, fontsize = 15)
 
         output_pdf = "Opacity.png"
         with PdfPages(output_pdf) as pdf:
