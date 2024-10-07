@@ -33,7 +33,7 @@ class FluxIntegrated(object):
     def showData(self):
         self.azimuth = self.matrix[:,1]
         self.cenith = self.matrix[:,0] * -1
-        self.Np = 99
+        self.Np = int(np.sqrt(len(self.azimuth)))
         self.z = np.abs(self.matrix[:,2].reshape(self.Np,self.Np))/1000
         """
         print("Azimuth")
