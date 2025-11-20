@@ -58,4 +58,4 @@ You can read more about our project clicking [here](https://www.researchgate.net
 * Jorge Jaimes [Jhosgun](https://github.com/Jhosgun)
 * Kevin Dlaikan 
 ## Contact
-If you have any questions or suggestions about MUYSC, please contact us by e-mail at jorge2170083@correo.uis.edu.co.
+If you have any questions or suggestions about MUYSC, please contact us by e-mail at jjalfredo68@gmail.com
